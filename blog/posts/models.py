@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.db.models.signals import pre_save
-#from django.utils.text import slugify
 from django.shortcuts import reverse
 
 User = get_user_model()
@@ -33,7 +32,13 @@ class Post(models.Model):
         instance = self
         qs = Comment.objects.filter(parent=instance)
         return qs
-
+    
+    @property
+    def likes(self):
+        instance = self
+        qs = Like.objects.filter(parent=instance)
+        return qs
+    
 
 
 class Comment(models.Model):   
@@ -46,3 +51,13 @@ class Comment(models.Model):
 
     class Meta:
         ordering = ["-created_at", "-updated_at"]
+
+
+class Like(models.Model):
+    like_id = models.IntegerField(default=1) 
+    parent = models.ForeignKey(Post, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now=False, auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]

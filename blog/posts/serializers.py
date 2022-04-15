@@ -2,7 +2,7 @@ import os
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from .models import Post, Comment
+from .models import Post, Comment, Like
 
 User = get_user_model()
 
@@ -29,6 +29,7 @@ class PostCreateUpdateSerializer(serializers.ModelSerializer):
 class PostListSerializer(serializers.ModelSerializer):
     #url = serializers.SerializerMethodField()
     comments = serializers.SerializerMethodField(read_only=True)
+    likes = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Post
@@ -38,11 +39,17 @@ class PostListSerializer(serializers.ModelSerializer):
             "title",
             "author",            
             "comments",
+            "likes",
         ]
 
     def get_comments(self, obj):
         qs = Comment.objects.filter(parent=obj).count()
         return qs
+
+    def get_likes(self, obj):
+        qs = Like.objects.filter(parent=obj).count()
+        return qs
+
     '''
     def get_url(self, obj):
         return obj.get_api_url()
@@ -52,6 +59,7 @@ class PostDetailSerializer(serializers.ModelSerializer):
     id = serializers.SerializerMethodField(read_only=True)
     author = serializers.PrimaryKeyRelatedField(read_only=True)
     comments = serializers.SerializerMethodField(read_only=True)
+    likes = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Post
@@ -63,6 +71,7 @@ class PostDetailSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
             "comments",
+            "likes",
         ]
 
     def get_id(self, obj):
@@ -72,6 +81,14 @@ class PostDetailSerializer(serializers.ModelSerializer):
         qs = Comment.objects.filter(parent=obj)
         try:
             serializer = CommentSerializer(qs, many=True)
+        except Exception as e:
+            print(e)
+        return serializer.data
+
+    def get_likes(self, obj):
+        qs = Like.objects.filter(parent=obj)
+        try:
+            serializer = LikeSerializer(qs, many=True)
         except Exception as e:
             print(e)
         return serializer.data
@@ -98,3 +115,22 @@ class CommentCreateUpdateSerializer(serializers.ModelSerializer):
         fields = [
             "body",
         ]
+
+
+class LikeSerializer(serializers.ModelSerializer):
+    like_id = serializers.IntegerField(source = 'id')
+
+    class Meta:
+        model = Like
+        fields = [
+            "id",     
+            "like_id",
+            "parent",
+            "author",   
+            "created_at",            
+        ]
+
+class LikeCreateUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Like
+        fields = ''

@@ -17,10 +17,11 @@ from rest_framework.generics import (
     RetrieveAPIView,
     RetrieveUpdateAPIView,
     RetrieveUpdateDestroyAPIView,
+    RetrieveDestroyAPIView,
 )
 
 #from rest_framework.pagination import PostLimitOffsetPagination
-from .models import Post, Comment
+from .models import Post, Comment, Like
 from .permissions import IsOwnerOrReadOnly, IsOwner
 #from .mixins import MultipleFieldLookupMixin
 from .serializers import (
@@ -29,6 +30,8 @@ from .serializers import (
     PostDetailSerializer,
     CommentSerializer,
     CommentCreateUpdateSerializer,
+    LikeSerializer,
+    LikeCreateUpdateSerializer,
 )
 
 # Create your views here.
@@ -128,22 +131,22 @@ class ListCommentAPIView(APIView):
 
 class MultipleFieldLookupMixin:
     """
-    Mixin to filter comments based on slug and id
+    Mixin to filter comments based on [post id] and [comment id]
     """
 
     def get_object(self):     
         logging.info(">>>>>>>>>>>>>>>>")  
         queryset = self.get_queryset()  # Get the base queryset
+        logging.info(queryset)
         queryset = self.filter_queryset(queryset)  # Apply any filter backends
+        logging.info(queryset)
         filter = {}
-        # for field in self.lookup_fields:
-        #     if self.kwargs[field]: # Ignore empty fields.
-        #         filter[field] = self.kwargs[field]
+        
         parent_id = Post.objects.get(id=self.kwargs["id"]).id
-        logging.info(parent_id)
+        logging.info(self.kwargs)
         filter["parent"] = parent_id
-        logging.info(self.kwargs["comment_id"])
-        filter["id"] = self.kwargs["comment_id"]
+        logging.info(self.kwargs["like_id"])
+        filter["id"] = self.kwargs["like_id"]
         obj = get_object_or_404(queryset, **filter)  # Lookup the object
         self.check_object_permissions(self.request, obj)
         logging.info(">>>>>>>>>>>>>>>>")  
@@ -171,3 +174,62 @@ class DetailCommentAPIView(MultipleFieldLookupMixin, RetrieveUpdateDestroyAPIVie
     queryset = Comment.objects.all()    
     lookup_fields = ["parent", "id"]
     serializer_class = CommentCreateUpdateSerializer
+
+
+class CreateLikeAPIView(APIView):
+    """
+    post:
+        Create a like instnace. Returns created like data
+
+        parameters: [id]
+
+    """
+
+    serializer_class = LikeCreateUpdateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, id, *args, **kwargs):
+        post = get_object_or_404(Post, id=id)
+        serializer = LikeCreateUpdateSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save(author=request.user, parent=post)
+            return Response(serializer.data, status=200)
+        else:
+            return Response({"errors": serializer.errors}, status=400)
+
+class ListLikeAPIView(APIView):
+    """
+    get:
+        Returns the list of like on a particular post
+    """
+
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get(self, request, id):
+        post = Post.objects.get(id=id)        
+        likes = Like.objects.filter(parent=post)
+        serializer = LikeSerializer(likes, many=True)
+        return Response(serializer.data, status=200)
+
+class DetailLikeAPIView(MultipleFieldLookupMixin, RetrieveDestroyAPIView):
+    """
+    get:
+        Returns the details of a like instance. Searches like using like id and post id in the url.
+
+    put:
+        Updates an existing like. Returns updated like data
+
+        parameters: [parent, author]
+
+    delete:
+        Delete an existing like
+
+        parameters: [parent, author]
+    """
+
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+    queryset = Like.objects.all()    
+    logging.info(queryset.values_list)
+    lookup_fields = ["parent", "id"]
+    serializer_class = LikeCreateUpdateSerializer
