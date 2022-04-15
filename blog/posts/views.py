@@ -1,6 +1,3 @@
-import logging
-
-
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework.permissions import (
     IsAuthenticated,
@@ -134,22 +131,16 @@ class MultipleFieldLookupMixin:
     Mixin to filter comments based on [post id] and [comment id]
     """
 
-    def get_object(self):     
-        logging.info(">>>>>>>>>>>>>>>>")  
-        queryset = self.get_queryset()  # Get the base queryset
-        logging.info(queryset)
-        queryset = self.filter_queryset(queryset)  # Apply any filter backends
-        logging.info(queryset)
+    def get_object(self):             
+        queryset = self.get_queryset()  # Get the base queryset        
+        queryset = self.filter_queryset(queryset)  # Apply any filter backends        
         filter = {}
         
-        parent_id = Post.objects.get(id=self.kwargs["id"]).id
-        logging.info(self.kwargs)
-        filter["parent"] = parent_id
-        logging.info(self.kwargs["like_id"])
+        parent_id = Post.objects.get(id=self.kwargs["id"]).id        
+        filter["parent"] = parent_id        
         filter["id"] = self.kwargs["like_id"]
         obj = get_object_or_404(queryset, **filter)  # Lookup the object
-        self.check_object_permissions(self.request, obj)
-        logging.info(">>>>>>>>>>>>>>>>")  
+        self.check_object_permissions(self.request, obj)        
         return obj
 
 
@@ -190,14 +181,18 @@ class CreateLikeAPIView(APIView):
 
     def post(self, request, id, *args, **kwargs):
         post = get_object_or_404(Post, id=id)
-        serializer = LikeCreateUpdateSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
+        likes = Like.objects.filter(parent=post, author=request.user.id)        
+        if likes.exists():            
+            return Response({'status': 'error', 'message': 'user already liked this post.'}, status=400)
+        
+        serializer = LikeCreateUpdateSerializer(data=request.data)        
+        if serializer.is_valid(raise_exception=True):            
             serializer.save(author=request.user, parent=post)
             return Response(serializer.data, status=200)
         else:
             return Response({"errors": serializer.errors}, status=400)
 
-class ListLikeAPIView(APIView):
+class ListLikeAPIView(APIView): 
     """
     get:
         Returns the list of like on a particular post
@@ -230,6 +225,5 @@ class DetailLikeAPIView(MultipleFieldLookupMixin, RetrieveDestroyAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     queryset = Like.objects.all()    
-    logging.info(queryset.values_list)
     lookup_fields = ["parent", "id"]
     serializer_class = LikeCreateUpdateSerializer

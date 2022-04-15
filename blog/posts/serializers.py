@@ -1,3 +1,4 @@
+from dataclasses import fields
 import os
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -133,4 +134,14 @@ class LikeSerializer(serializers.ModelSerializer):
 class LikeCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Like
-        fields = ''
+        fields = ['id','parent','author']
+        read_only_fields = ['id','parent','author']
+
+    def get_serializer_context(self):
+        return {
+            'parent': self.kwargs['parent'],
+            'author': self.kwargs['author'],
+            'request': self.request
+        }
+
+    
