@@ -21,7 +21,7 @@ class PostCreateUpdateSerializer(serializers.ModelSerializer):
 
     def validate_body(self, value):
         if len(value) > 1000:
-            return serializers.ValidationError("Max body length is 1000 characters")
+            return serializers.ValidationError("Max post length is 1000 characters")
         return value
 
    
@@ -57,7 +57,6 @@ class PostDetailSerializer(serializers.ModelSerializer):
         model = Post
         fields = [
             "id",     
-            "comment_id"       
             "title",            
             "body",
             "author",            
@@ -92,9 +91,6 @@ class CommentSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-
-    
-
 
 class CommentCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:

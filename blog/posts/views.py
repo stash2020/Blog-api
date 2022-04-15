@@ -19,9 +19,9 @@ from rest_framework.generics import (
     RetrieveUpdateDestroyAPIView,
 )
 
-#from .pagination import PostLimitOffsetPagination
+#from rest_framework.pagination import PostLimitOffsetPagination
 from .models import Post, Comment
-#from .permissions import IsOwnerOrReadOnly, IsOwner
+from .permissions import IsOwnerOrReadOnly, IsOwner
 #from .mixins import MultipleFieldLookupMixin
 from .serializers import (
     PostCreateUpdateSerializer,
@@ -86,7 +86,7 @@ class DetailPostAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Post.objects.all()
     lookup_field = "id"
     serializer_class = PostDetailSerializer
-    #permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
 
 class CreateCommentAPIView(APIView):
@@ -117,7 +117,7 @@ class ListCommentAPIView(APIView):
         Returns the list of comments on a particular post
     """
 
-    #permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request, id):
         post = Post.objects.get(id=id)        
@@ -132,7 +132,6 @@ class MultipleFieldLookupMixin:
     """
 
     def get_object(self):     
-        #logging.basicConfig(level=logging.INFO) 
         logging.info(">>>>>>>>>>>>>>>>")  
         queryset = self.get_queryset()  # Get the base queryset
         queryset = self.filter_queryset(queryset)  # Apply any filter backends
@@ -167,7 +166,7 @@ class DetailCommentAPIView(MultipleFieldLookupMixin, RetrieveUpdateDestroyAPIVie
         parameters: [parent, author, body]
     """
 
-    #permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     queryset = Comment.objects.all()    
     lookup_fields = ["parent", "id"]
