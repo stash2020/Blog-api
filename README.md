@@ -56,15 +56,10 @@ Make sure in each api call, you provide username, password by creating a user.**
 
 
 ## With Docker
-
-- pull image
-  ```
-  docker pull stashxander/drf_blog
-  ```
   
 - run container
   ```
-  docker run -d -p 8080:8000  --name drf_blog_app drf_blog
+  docker run -d -p 8080:8000  --name drf_blog_app stashxander/drf_blog
   ```
 **Note: with docker Port is 8080**
 
