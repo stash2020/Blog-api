@@ -24,12 +24,12 @@ urlpatterns = [
         name="create_comment",
     ),
     path(
-        "<int:id>/comment/<int:comment_id>/",
+        "<int:id>/comment/<int:id_2>/",
         DetailCommentAPIView.as_view(),
         name="comment_detail",
     ),
     path('<int:id>/like/', ListLikeAPIView.as_view(), name="list_like"),
     path('<int:id>/like/create/', CreateLikeAPIView.as_view(), name="create_like",),
-    path("<int:id>/like/<int:like_id>/", DetailLikeAPIView.as_view(), name="like_detail",),
+    path("<int:id>/like/<int:id_2>/", DetailLikeAPIView.as_view(), name="like_detail",),
 ]
 

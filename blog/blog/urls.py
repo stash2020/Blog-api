@@ -41,4 +41,10 @@ urlpatterns = [
     
     # api
     path("posts/", include("posts.urls", namespace="posts_api")),
+
+    # browser login
+    path("api-auth/", include("rest_framework.urls")),
+
+    # api authentication and token generation
+    path("user/", include("users.urls", namespace="users")),
 ]

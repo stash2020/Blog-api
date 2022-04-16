@@ -28,7 +28,6 @@ class PostCreateUpdateSerializer(serializers.ModelSerializer):
    
 
 class PostListSerializer(serializers.ModelSerializer):
-    #url = serializers.SerializerMethodField()
     comments = serializers.SerializerMethodField(read_only=True)
     likes = serializers.SerializerMethodField(read_only=True)
 
@@ -36,7 +35,6 @@ class PostListSerializer(serializers.ModelSerializer):
         model = Post
         fields = [
             "id",   
-            #"url",         
             "title",
             "author",            
             "comments",
@@ -51,11 +49,7 @@ class PostListSerializer(serializers.ModelSerializer):
         qs = Like.objects.filter(parent=obj).count()
         return qs
 
-    '''
-    def get_url(self, obj):
-        return obj.get_api_url()
-    '''
-
+    
 class PostDetailSerializer(serializers.ModelSerializer):
     id = serializers.SerializerMethodField(read_only=True)
     author = serializers.PrimaryKeyRelatedField(read_only=True)
@@ -96,13 +90,11 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    comment_id = serializers.IntegerField(source = 'id')
-
+    
     class Meta:
         model = Comment
         fields = [
-            "id",
-            "comment_id",
+            "id",    
             "parent",
             "author",
             "body",
@@ -119,13 +111,11 @@ class CommentCreateUpdateSerializer(serializers.ModelSerializer):
 
 
 class LikeSerializer(serializers.ModelSerializer):
-    like_id = serializers.IntegerField(source = 'id')
-
+    
     class Meta:
         model = Like
         fields = [
             "id",     
-            "like_id",
             "parent",
             "author",   
             "created_at",            
@@ -137,11 +127,25 @@ class LikeCreateUpdateSerializer(serializers.ModelSerializer):
         fields = ['id','parent','author']
         read_only_fields = ['id','parent','author']
 
-    def get_serializer_context(self):
-        return {
-            'parent': self.kwargs['parent'],
-            'author': self.kwargs['author'],
-            'request': self.request
-        }
+    
 
     
+class UserSerializer(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(read_only=True)
+    password = serializers.CharField(min_length=8, max_length=32, write_only=True)
+    
+    class Meta:
+        model = User
+        fields = ["id", "username", "password"]
+        extra_kwargs = {'password':{
+            'write_only': True,
+            'style': {'input_type': 'password'}
+        }}
+
+    def create(self, validated_data):
+        username = validated_data["username"]
+        password = validated_data["password"]
+        user_obj = User(username=username)
+        user_obj.set_password(password)
+        user_obj.save()
+        return user_obj

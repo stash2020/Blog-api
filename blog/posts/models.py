@@ -42,7 +42,7 @@ class Post(models.Model):
 
 
 class Comment(models.Model):   
-    comment_id = models.IntegerField(default=1) 
+    #comment_id = models.IntegerField() 
     parent = models.ForeignKey(Post, on_delete=models.CASCADE)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     body = models.TextField()
@@ -54,10 +54,13 @@ class Comment(models.Model):
 
 
 class Like(models.Model):
-    like_id = models.IntegerField(default=1) 
+    #like_id = models.IntegerField() 
     parent = models.ForeignKey(Post, on_delete=models.CASCADE)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now=False, auto_now_add=True)
 
     class Meta:
         ordering = ["-created_at"]
+
+
+

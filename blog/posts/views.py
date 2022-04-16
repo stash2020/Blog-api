@@ -1,3 +1,5 @@
+import logging
+
 from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework.permissions import (
     IsAuthenticated,
@@ -136,9 +138,15 @@ class MultipleFieldLookupMixin:
         queryset = self.filter_queryset(queryset)  # Apply any filter backends        
         filter = {}
         
-        parent_id = Post.objects.get(id=self.kwargs["id"]).id        
-        filter["parent"] = parent_id        
-        filter["id"] = self.kwargs["like_id"]
+        for field in self.lookup_fields:
+            try:
+                filter[field] = self.kwargs[field]
+            except:
+                pass
+
+        filter["parent"] = self.kwargs["id"]
+        filter["id"] = self.kwargs["id_2"]
+        
         obj = get_object_or_404(queryset, **filter)  # Lookup the object
         self.check_object_permissions(self.request, obj)        
         return obj
@@ -162,8 +170,8 @@ class DetailCommentAPIView(MultipleFieldLookupMixin, RetrieveUpdateDestroyAPIVie
 
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
-    queryset = Comment.objects.all()    
-    lookup_fields = ["parent", "id"]
+    queryset = Comment.objects.all()        
+    lookup_fields = ('id', 'parent_id')    
     serializer_class = CommentCreateUpdateSerializer
 
 
@@ -210,20 +218,16 @@ class DetailLikeAPIView(MultipleFieldLookupMixin, RetrieveDestroyAPIView):
     """
     get:
         Returns the details of a like instance. Searches like using like id and post id in the url.
-
-    put:
-        Updates an existing like. Returns updated like data
-
-        parameters: [parent, author]
-
+    
     delete:
         Delete an existing like
 
         parameters: [parent, author]
     """
-
+    
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
-    queryset = Like.objects.all()    
-    lookup_fields = ["parent", "id"]
+    queryset = Like.objects.all()        
+    lookup_fields = ('id', 'parent_id')
     serializer_class = LikeCreateUpdateSerializer
+    
