@@ -60,7 +60,7 @@ class UserDetailAPIView(RetrieveUpdateDestroyAPIView):
     delete:
         Delete a user instance
         
-        parameters: [id]
+        parameters: [id] 
     """
 
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwner]
