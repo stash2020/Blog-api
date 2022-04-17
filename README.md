@@ -1,4 +1,4 @@
-# Blog API
+# DRF Blog API
 
 A REST API for blog built using Django Rest Framework
 
