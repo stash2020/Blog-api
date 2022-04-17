@@ -13,7 +13,7 @@ A REST API for blog built using Django Rest Framework
 ### Quickstart
 - Clone the repo.  
     ```bash
-    git clone https://github.com/stash2020/Blog-api.git
+    git clone https://github.com/stash2020/drf_blog.git
     ```
 
 - Inside the blog folder, make a virtual environment and activate it 
