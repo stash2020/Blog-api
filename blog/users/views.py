@@ -26,9 +26,9 @@ User = get_user_model()
 class UserCreateAPIView(CreateAPIView):
     """
     post:
-        Create new user instance. Returns username, email of the created user.
+        Create new user instance. Returns username of the created user.
 
-        parameters: [username, email, password]
+        parameters: [username, password]
     """
 
     permission_classes = [AllowAny]
@@ -55,7 +55,7 @@ class UserDetailAPIView(RetrieveUpdateDestroyAPIView):
     put:
         Update the detail of a user instance
 
-        parameters: [id, username, email, password]
+        parameters: [id, username, password]
     
     delete:
         Delete a user instance
