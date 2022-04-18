@@ -51,7 +51,7 @@ A REST API for blog built using Django Rest Framework
     python manage.py runserver
     ```
 
-- Check few Tests
+- Run created Tests
     ```
     python manage.py test
     ```
