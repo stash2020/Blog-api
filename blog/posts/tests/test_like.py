@@ -23,11 +23,11 @@ User = get_user_model()
 class LikeListCreateAPIViewTestCase(APITestCase):
     
     def setUp(self):           
-        self.username = 'test'        
-        self.password = 'abcd1234'
+        self.username = "test"        
+        self.password = "abcd1234"
         self.user = User.objects.create_user(username = self.username, password = self.password)
-        self.post = Post.objects.create(title='test', body='this is test like.')      
-        self.user_2 = User.objects.create_user(username = 'test2', password = self.password)
+        self.user_2 = User.objects.create_user(username = "test2", password = self.password)
+        self.post = Post.objects.create(title="test", body="this is test like.")              
         
     def tearDown(self):
         self.user.delete()        
@@ -35,33 +35,40 @@ class LikeListCreateAPIViewTestCase(APITestCase):
         self.post.delete()        
 
     def test_unauthorized_user_cannot_create_like(self):
-        url = reverse('posts:create_like', kwargs={'id': self.post.pk})        
+        url = reverse("posts:create_like", kwargs={"id": self.post.pk})        
         res = self.client.post(url)        
         self.assertEqual(res.status_code, HTTP_403_FORBIDDEN)
 
     def test_create_like(self):      
-        url = reverse('posts:create_like', kwargs={'id': self.post.pk})  
+        url = reverse("posts:create_like", kwargs={"id": self.post.pk})  
         self.client.force_login(self.user_2)
         res = self.client.post(url)            
         self.assertEqual(res.status_code, HTTP_201_CREATED)
     
     def test_like_created_detail(self):        
         Like.objects.create(parent = self.post, author = self.user_2)
-        url = reverse('posts:list_like', kwargs={'id': self.post.pk})
+        url = reverse("posts:list_like", kwargs={"id": self.post.pk})
         res = self.client.get(url)
         self.assertTrue(len(json.loads(res.content)) == Like.objects.count())
 
 class LikeDetailAPIViewTestCase(APITestCase):
     
     def setUp(self):
-        self.username = 'test'        
-        self.password = 'abcd1234'
+        self.username = "test"        
+        self.password = "abcd1234"
         self.user = User.objects.create_user(username = self.username, password = self.password)
-        self.post = Post.objects.create(title='test', body='this is test post.')      
-        self.user_2 = User.objects.create_user(username = 'test2', password = self.password)
+        self.user_2 = User.objects.create_user(username = "test2", password = self.password)
+        self.user_3 = User.objects.create_user(username = "test3", password = self.password)
+        self.post = Post.objects.create(title="test", body="this is test post.")              
         self.like = Like.objects.create(parent = self.post, author = self.user_2)               
-        self.url = reverse('posts:like_detail', kwargs={'id': self.post.pk, 'id_2': self.like.pk})        
-
+        self.url = reverse("posts:like_detail", kwargs={"id": self.post.pk, "id_2": self.like.pk})        
+        
+    def tearDown(self):
+        self.user.delete()          
+        self.user_2.delete()  
+        self.user_3.delete()  
+        self.post.delete()
+        self.like.delete()
     
     def test_post_object_bundle(self):        
         res = self.client.get(self.url)
@@ -75,4 +82,9 @@ class LikeDetailAPIViewTestCase(APITestCase):
         self.client.force_login(self.user_2)
         res = self.client.delete(self.url)
         self.assertEqual(res.status_code, HTTP_204_NO_CONTENT)
+
+    def test_user_cannot_delete_other_user_like(self):
+        self.client.force_login(self.user_3)
+        res = self.client.delete(self.url)
+        self.assertEqual(res.status_code, HTTP_403_FORBIDDEN)
 

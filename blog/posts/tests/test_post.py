@@ -23,29 +23,27 @@ User = get_user_model()
 class PostListCreateAPIViewTestCase(APITestCase):
     
     def setUp(self):           
-        self.username = 'test'        
-        self.password = 'abcd1234'
-        self.user = User.objects.create(username = self.username)
-        self.user.set_password(self.password)
-        self.user.save()
+        self.username = "test"        
+        self.password = "abcd1234"
+        self.user = User.objects.create_user(username = self.username, password = self.password)        
         
     def tearDown(self):
         self.user.delete()        
 
     def test_unauthorized_user_cannot_create_post(self):
-        url = reverse('posts:create_post')
-        res = self.client.post(url, {'title': 'test', 'body': 'this is test post.'})
+        url = reverse("posts:create_post")
+        res = self.client.post(url, {"title": "test", "body": "this is test post."})
         self.assertEqual(res.status_code, HTTP_403_FORBIDDEN)
 
     def test_create_post(self):        
-        url = reverse('posts:create_post')
+        url = reverse("posts:create_post")
         self.client.force_login(self.user)
-        res = self.client.post(url, {'title': 'test', 'body': 'this is test post.'})               
+        res = self.client.post(url, {"title": "test", "body": "this is test post."})               
         self.assertEqual(res.status_code, HTTP_201_CREATED)
     
     def test_post_created_detail(self):        
-        Post.objects.create(title='test', body='this is test post.')
-        url = reverse('posts:list_post')
+        Post.objects.create(title="test", body="this is test post.")
+        url = reverse("posts:list_post")
         res = self.client.get(url)
 
         self.assertTrue(len(json.loads(res.content)) == Post.objects.count())
@@ -53,14 +51,17 @@ class PostListCreateAPIViewTestCase(APITestCase):
 class PostDetailAPIViewTestCase(APITestCase):
     
     def setUp(self):
-        self.username = 'test'        
-        self.password = 'abcd1234'
-        self.user = User.objects.create(username = self.username)
-        self.user.set_password(self.password)     
-        self.user.save()   
-        self.post = Post.objects.create(title='test', body='this is test post.')               
-        self.url = reverse('posts:post_detail', kwargs={'id': self.post.pk})        
-
+        self.username = "test"        
+        self.password = "abcd1234"
+        self.user = User.objects.create_user(username = self.username, password = self.password)        
+        self.user_2 = User.objects.create_user(username = "test2", password = self.password)        
+        self.post = Post.objects.create(title="test", body="this is test post.")               
+        self.url = reverse("posts:post_detail", kwargs={"id": self.post.pk})        
+        
+    def tearDown(self):
+        self.user.delete()
+        self.post.delete()
+        self.user_2.delete()
     
     def test_post_object_bundle(self):        
         res = self.client.get(self.url)
@@ -71,28 +72,30 @@ class PostDetailAPIViewTestCase(APITestCase):
         self.assertEqual(post_serializer_data, res_data)
 
     def test_post_object_update_authorization(self):        
-        new_user = User.objects.create_user(username = 'newuser', password = 'newpass')
-        new_token = Token.objects.create(user=new_user)
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + new_token.key)
-
+        self.client.force_login(self.user_2)
         # HTTP PUT
-        res = self.client.put(self.url, {'title': 'test', 'body': 'this is test post.'})
+        res = self.client.put(self.url, {"title": "test", "body": "this is test post."})
         self.assertEqual(res.status_code, HTTP_403_FORBIDDEN)
 
         # HTTP PATCH
-        res = self.client.patch(self.url, {'title': 'test', 'body': 'this is test post.'})
+        res = self.client.patch(self.url, {"title": "test", "body": "this is test post."})
         self.assertEqual(res.status_code, HTTP_403_FORBIDDEN)
 
     def test_post_put_object_update(self):        
         self.client.force_login(self.user)
-        res = self.client.put(self.url, {'title': 'new test', 'body': 'this is NEW test post.'})
+        res = self.client.put(self.url, {"title": "new test", "body": "this is NEW test post."})
         res_data = json.loads(res.content)
         post = Post.objects.get(id=self.post.id)
         
-        self.assertEqual(res_data.get('title'), post.title)
-        self.assertEqual(res_data.get('body'), post.body)
+        self.assertEqual(res_data.get("title"), post.title)
+        self.assertEqual(res_data.get("body"), post.body)
 
     def test_post_object_delete(self):
         self.client.force_login(self.user)
         res = self.client.delete(self.url)
         self.assertEqual(res.status_code, HTTP_204_NO_CONTENT)
+
+    def test_user_cannot_delete_other_user_post(self):
+        self.client.force_login(self.user_2)
+        res = self.client.delete(self.url)
+        self.assertEqual(res.status_code, HTTP_403_FORBIDDEN)
