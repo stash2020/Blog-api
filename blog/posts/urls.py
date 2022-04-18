@@ -17,9 +17,9 @@ urlpatterns = [
     path("", ListPostAPIView.as_view(), name="list_post"),
     path("create/", CreatePostAPIView.as_view(), name="create_post"),
     path("<int:id>/", DetailPostAPIView.as_view(), name="post_detail"),
-    path('<int:id>/comment/', ListCommentAPIView.as_view(), name="list_comment"),
+    path("<int:id>/comment/", ListCommentAPIView.as_view(), name="list_comment"),
     path(
-        '<int:id>/comment/create/',
+        "<int:id>/comment/create/",
         CreateCommentAPIView.as_view(),
         name="create_comment",
     ),
@@ -28,8 +28,8 @@ urlpatterns = [
         DetailCommentAPIView.as_view(),
         name="comment_detail",
     ),
-    path('<int:id>/like/', ListLikeAPIView.as_view(), name="list_like"),
-    path('<int:id>/like/create/', CreateLikeAPIView.as_view(), name="create_like",),
+    path("<int:id>/like/", ListLikeAPIView.as_view(), name="list_like"),
+    path("<int:id>/like/create/", CreateLikeAPIView.as_view(), name="create_like",),
     path("<int:id>/like/<int:id_2>/", DetailLikeAPIView.as_view(), name="like_detail",),
 ]
 

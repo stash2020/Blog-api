@@ -52,7 +52,7 @@ class CreatePostAPIView(APIView):
         serializer = PostCreateUpdateSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save(author=request.user)
-            return Response(serializer.data, status=200)
+            return Response(serializer.data, status=201)
         else:
             return Response({"errors": serializer.errors}, status=400)
 
@@ -108,7 +108,7 @@ class CreateCommentAPIView(APIView):
         serializer = CommentCreateUpdateSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save(author=request.user, parent=post)
-            return Response(serializer.data, status=200)
+            return Response(serializer.data, status=201)
         else:
             return Response({"errors": serializer.errors}, status=400)
 
@@ -171,7 +171,7 @@ class DetailCommentAPIView(MultipleFieldLookupMixin, RetrieveUpdateDestroyAPIVie
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     queryset = Comment.objects.all()        
-    lookup_fields = ('id', 'parent_id')    
+    lookup_fields = ("id", "parent_id")    
     serializer_class = CommentCreateUpdateSerializer
 
 
@@ -191,12 +191,12 @@ class CreateLikeAPIView(APIView):
         post = get_object_or_404(Post, id=id)
         likes = Like.objects.filter(parent=post, author=request.user.id)        
         if likes.exists():            
-            return Response({'status': 'error', 'message': 'user already liked this post.'}, status=400)
+            return Response({"status": "error", "message": "user already liked this post."}, status=400)
         
         serializer = LikeCreateUpdateSerializer(data=request.data)        
         if serializer.is_valid(raise_exception=True):            
             serializer.save(author=request.user, parent=post)
-            return Response(serializer.data, status=200)
+            return Response(serializer.data, status=201)
         else:
             return Response({"errors": serializer.errors}, status=400)
 
@@ -228,6 +228,6 @@ class DetailLikeAPIView(MultipleFieldLookupMixin, RetrieveDestroyAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     queryset = Like.objects.all()        
-    lookup_fields = ('id', 'parent_id')
+    lookup_fields = ("id", "parent_id")
     serializer_class = LikeCreateUpdateSerializer
     

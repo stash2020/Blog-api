@@ -10,15 +10,15 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "username", "password"]
-        extra_kwargs = {'password':{
-            'write_only': True,
-            'style': {'input_type': 'password'}
+        extra_kwargs = {"password":{
+            "write_only": True,
+            "style": {"input_type": "password"}
         }}
 
     def create(self, validated_data):
         username = validated_data["username"]
         password = validated_data["password"]
         user_obj = User(username=username)
-        user_obj.set_password(password)
+        user_obj.set_password(password) # password hashed before stored
         user_obj.save()
         return user_obj

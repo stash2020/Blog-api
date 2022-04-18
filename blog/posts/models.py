@@ -19,14 +19,7 @@ class Post(models.Model):
     class Meta:
         ordering = ["-created_at", "-updated_at"]
 
-    '''
-    def get_api_url(self):
-        try:
-            return reverse("posts_api:post_detail", kwargs={"post_id": self.post_id})
-        except:
-            None
-    '''
-
+    
     @property
     def comments(self):
         instance = self
@@ -42,7 +35,6 @@ class Post(models.Model):
 
 
 class Comment(models.Model):   
-    #comment_id = models.IntegerField() 
     parent = models.ForeignKey(Post, on_delete=models.CASCADE)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     body = models.TextField()
