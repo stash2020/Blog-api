@@ -68,12 +68,6 @@ class UserLoginAPIViewTestCase(APITestCase):
         res = self.client.login(username = self.username, password = "wrong")        
         self.assertEqual(res, False)
     
-    # check it later
-    #def test_authentication_with_valid_data(self):
-    #    res = self.client.post(self.login_url, username = self.username, password = self.password)                      
-    #    self.assertEqual(res.status_code, HTTP_200_OK)
-    #    self.assertTrue("token" in json.loads(res.content))
-
     def test_user_can_login(self):        
         res = self.client.post(self.login_url, {"username": self.username, "password": self.password}, format="json")        
         self.assertEqual(res.status_code, HTTP_200_OK)
