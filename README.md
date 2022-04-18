@@ -97,8 +97,8 @@ While working with api in browser, you can login using `http://127.0.0.1:8000/ap
 
 - Post:
     - id: Post id(read only),
-    - title: string,
     - author: user-id(read only),
+    - title: string,    
     - body: string,
     - created_at: datetime(read only)
     - updated_at: datetime(read only)
