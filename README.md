@@ -51,6 +51,13 @@ A REST API for blog built using Django Rest Framework
     python manage.py runserver
     ```
 
+- Check few Tests
+    ```
+    python manage.py test
+    ```
+    
+
+
 **Note: After running the server, you can use the api inside browser or you can use Postman to make api calls. 
 Make sure in each api call, you provide username, password by creating a user.**
 
