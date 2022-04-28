@@ -9,7 +9,7 @@ ENV PYTHONUNBUFFERED 1
 # Get the Real World example app
 # RUN git clone https://github.com/stash2020/Blog-api.git /drf_src
 
-COPY ./ /drf_src
+COPY ./blog /drf_src
 
 # Set the working directory to /drf
 # NOTE: all the directives that follow in the Dockerfile will be executed in
